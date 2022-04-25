@@ -59,11 +59,10 @@ def update():
     # all_positions = np.empty((2, 2))
     for particle, entity_particle in zip(universe.particles, particles):
         entity_particle.position = particle.position
+        print(particle)
 
     if mouse.left:
-        camera.position += mouse.velocity / (time.dt * 2)
-
-    print(camera.fov)
+        camera.position -= mouse.velocity / (time.dt * 2) * camera.fov / 90
 
 
 app.run()
