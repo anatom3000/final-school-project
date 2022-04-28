@@ -8,15 +8,16 @@ window.title = "Yet another Gravit"  # The window title
 window.borderless = False  # Show a border
 window.fullscreen = False  # Do not go Fullscreen
 window.aspect_ratio = 4 / 3
+window.vsync = False
 
-camera.orthographic = True
+camera.orthographic = False
 
 # window.exit_button.visible = False      # Do not show the in-game red X that loses the window
 # window.fps_counter.enabled = True       # Show the FPS (Frames per second) counter
 
 app = Ursina()
 
-base_mass = 1
+base_mass = 1e-12
 universe = physics.Universe(
     np.array(
         [
@@ -26,7 +27,7 @@ universe = physics.Universe(
             physics.Particle(mass=base_mass, position=np.array([-2.0, -2.0])),
         ]
     ),
-    constant=100,
+    constant=2,
 )
 
 particles = np.array(
@@ -59,7 +60,8 @@ def update():
     # all_positions = np.empty((2, 2))
     for particle, entity_particle in zip(universe.particles, particles):
         entity_particle.position = particle.position
-        print(particle)
+        if started:
+            print(particle)
 
     if mouse.left:
         camera.position -= mouse.velocity / (time.dt * 2) * camera.fov / 90
