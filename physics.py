@@ -22,8 +22,6 @@ class Particle:
     def __str__(self):
         return f"Particle(mass={self.mass}, position={self.position}, velocity={self.velocity}), acceleration={self.acceleration}"
 
-class
-
 class Universe:
     def __init__(self, particles: np.array, constant: float = 1):
         self.particles = particles
