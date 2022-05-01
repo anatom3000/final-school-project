@@ -1,2 +1,2 @@
-# an interesting title
-for now this is just me learning ursina
+# Final School Project
+totally not™ the continuation of anatom3000/Gravit
