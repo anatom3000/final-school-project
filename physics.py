@@ -1,26 +1,8 @@
 import numpy as np
 
-
 def unit(a):
     return a / np.linalg.norm(a)
 
-
-class Particle:
-    def __init__(
-            self,
-            mass: float,
-            position: np.array = np.array([0.0, 0.0]),
-            velocity: np.array = np.array([0.0, 0.0]),
-            acceleration: np.array = np.array([0.0, 0.0])
-    ):
-        self.mass = mass
-        self.position = position
-        self.velocity = velocity
-        self.acceleration = acceleration
-        self.forces = np.array([])
-
-    def __str__(self):
-        return f"Particle(mass={self.mass}, position={self.position}, velocity={self.velocity}), acceleration={self.acceleration}"
 
 class Universe:
     def __init__(self, particles: np.array, constant: float = 1):
@@ -41,3 +23,6 @@ class Universe:
             particle.acceleration *= self.constant
             particle.velocity = particle.acceleration * dtime
             particle.position += particle.velocity * dtime
+
+    def __iter__(self):
+        return iter(self.particles)

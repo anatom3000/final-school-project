@@ -1,68 +1,73 @@
 import numpy as np
 
-from ursina import *
+from sys import exit
+
+import pygame
+from pygame.locals import *
 
 import physics
+from camera import Camera
+from particle import Particle
 
-window.title = "Yet another Gravit"  # The window title
-window.borderless = False  # Show a border
-window.fullscreen = False  # Do not go Fullscreen
-window.aspect_ratio = 4 / 3
+BLACK = (0, 0, 0)
+RESOLUTION = np.array([640, 480])
+CAMERA_STEP = 1
 
-camera.orthographic = True
-
-# window.exit_button.visible = False      # Do not show the in-game red X that loses the window
-# window.fps_counter.enabled = True       # Show the FPS (Frames per second) counter
-
-app = Ursina()
+pygame.init()
 
 base_mass = 1
 universe = physics.Universe(
     np.array(
         [
-            physics.Particle(mass=base_mass, position=np.array([+2.0, +2.0])),
-            #    physics.Particle(mass=base_mass, position=np.array([+2.0, -2.0])),
-            #    physics.Particle(mass=base_mass, position=np.array([-2.0, +2.0])),
-            physics.Particle(mass=base_mass, position=np.array([-2.0, -2.0])),
+            Particle(mass=base_mass, position=np.array([100.0, 190.0])),
+            Particle(mass=base_mass, position=np.array([100.0, 200.0])),
+            Particle(mass=base_mass, position=np.array([0.0, 0.0])),
+            Particle(mass=base_mass, position=np.array([200.0, 200.0])),
         ]
     ),
-    constant=100,
+    constant=1e9
 )
 
-particles = np.array(
-    [
-        Entity(model="sphere", color=color.orange, scale=2, position=p.position)
-        for p in universe.particles
-    ]
-)
+screen = pygame.display.set_mode(RESOLUTION)
+camera = Camera(RESOLUTION)
 
-started = False
-ZOOM_MULTIPLIER = 1.1
+clock = pygame.time.Clock()
 
 
-def input(key):
-    global started
+tick_physics = False
+running = True
+while running:
+    for ev in pygame.event.get():
+        if ev.type == QUIT:
+            pygame.quit()
+            exit(0)
+        if ev.type == KEYUP:
+            if ev.key == K_SPACE:
+                tick_physics = not tick_physics
 
-    if key == "space":
-        started = not started
+        if ev.type == MOUSEBUTTONDOWN:
+            # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
+            if ev.button == 1:
+                camera.moving = True
+            if ev.button == 4:
+                camera.zoom_in(1.1)
+            if ev.button == 5:
+                camera.zoom_out(1.1)
 
-    if key == "scroll up":
-        camera.fov = max(5.0, camera.fov / ZOOM_MULTIPLIER)
-    if key == "scroll down":
-        camera.fov = min(150.0, camera.fov * ZOOM_MULTIPLIER)
+        if ev.type == pygame.MOUSEBUTTONUP:
+            camera.moving = False
 
+        if ev.type == pygame.MOUSEMOTION:
+            if camera.moving:
+                camera.move(-np.array(ev.rel))
+    dt = clock.tick() / 1000
 
-def update():
-    if started:
-        universe.tick(time.dt)
-    # print(np.dstack((universe.particles, particles)))
-    # all_positions = np.empty((2, 2))
-    for particle, entity_particle in zip(universe.particles, particles):
-        entity_particle.position = particle.position
-        print(particle)
+    screen.fill(BLACK)
 
-    if mouse.left:
-        camera.position -= mouse.velocity / (time.dt * 2) * camera.fov / 90
+    if tick_physics:
+        universe.tick(dt)
 
+    for particle in universe:
+        particle.display(screen, camera)
 
-app.run()
+    pygame.display.flip()
