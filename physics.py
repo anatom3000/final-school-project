@@ -1,10 +1,13 @@
 import numpy as np
 
+from utils import Stringable
+
+
 def unit(a):
     return a / np.linalg.norm(a)
 
 
-class Universe:
+class Universe(Stringable):
     def __init__(self, particles: np.array, constant: float = 1):
         self.particles = particles
         self.constant = constant
@@ -23,6 +26,7 @@ class Universe:
             particle.acceleration *= self.constant
             particle.velocity = particle.acceleration * dtime
             particle.position += particle.velocity * dtime
+            print(particle.position)
 
     def __iter__(self):
         return iter(self.particles)

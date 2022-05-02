@@ -5,34 +5,34 @@ from sys import exit
 import pygame
 from pygame.locals import *
 
-import physics
+from physics import Universe
 from camera import Camera
 from particle import Particle
+from player import Player
 
 BLACK = (0, 0, 0)
+LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([640, 480])
-CAMERA_STEP = 1
+BASE_MASS = 1
 
 pygame.init()
 
-base_mass = 1
-universe = physics.Universe(
+player = Player()
+
+universe = Universe(
     np.array(
         [
-            Particle(mass=base_mass, position=np.array([100.0, 190.0])),
-            Particle(mass=base_mass, position=np.array([100.0, 200.0])),
-            Particle(mass=base_mass, position=np.array([0.0, 0.0])),
-            Particle(mass=base_mass, position=np.array([200.0, 200.0])),
-        ]
+            player,  # thanks, Python
+            Particle(mass=BASE_MASS, position=np.array([5.0, 0.0])),
+        ],
     ),
-    constant=1e9
+    constant=100
 )
 
-screen = pygame.display.set_mode(RESOLUTION)
 camera = Camera(RESOLUTION)
 
+screen = pygame.display.set_mode(RESOLUTION)
 clock = pygame.time.Clock()
-
 
 tick_physics = False
 running = True
@@ -49,25 +49,23 @@ while running:
             # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
             if ev.button == 1:
                 camera.moving = True
-            if ev.button == 4:
-                camera.zoom_in(1.1)
-            if ev.button == 5:
-                camera.zoom_out(1.1)
 
-        if ev.type == pygame.MOUSEBUTTONUP:
-            camera.moving = False
-
-        if ev.type == pygame.MOUSEMOTION:
-            if camera.moving:
-                camera.move(-np.array(ev.rel))
-    dt = clock.tick() / 1000
+    dt = clock.tick(60) / 1000
 
     screen.fill(BLACK)
 
-    if tick_physics:
+    if True:
         universe.tick(dt)
+        screen.fill(LIGHT_BLUE)
+
+    camera.follow(player, offset=np.array([0, 0]))
 
     for particle in universe:
         particle.display(screen, camera)
+    player.display(screen, camera)
+
+    pygame.draw.circle(screen, (0, 255, 0), camera.convert_position(np.array([0.0, 0.0])), 1)
+
+    pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)}")
 
     pygame.display.flip()
