@@ -3,7 +3,9 @@ import numpy as np
 from particle import Particle
 from utils import Stringable
 
-VELOCITY_TO_ZOOM_FACTOR = 0.01
+from math import tanh
+
+VELOCITY_TO_ZOOM_FACTOR = 0.5
 
 
 class Camera(Stringable):
@@ -25,10 +27,15 @@ class Camera(Stringable):
 
     @staticmethod
     def _convert_velocity_to_zoom(velocity: np.array):
-        if np.any(velocity):
-            return VELOCITY_TO_ZOOM_FACTOR / np.linalg.norm(velocity)
-        else:
-            return VELOCITY_TO_ZOOM_FACTOR
+        # function made in Desmos
+        # https://www.desmos.com/calculator/w9ns72ijq1
+        x = np.linalg.norm(velocity)
+        m = 0.16
+        a = 20
+        b = 0.47
+        c = -1.7
+        return 5.0
+        #return 1 / (m * tanh(x / a + b)) + c
 
     # TODO: add smoothing. currently the camera is not smooth at all
     def follow(self, particle: Particle, offset: np.array = None):

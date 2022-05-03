@@ -1,3 +1,5 @@
+import numpy as np
+
 class Stringable:
     # simple class that automatically generate a string representation
     # just subclass this class to add
@@ -6,3 +8,7 @@ class Stringable:
 
     def __repr__(self):
         return self.__str__()
+
+
+def unit(a):
+    return a / np.linalg.norm(a)
