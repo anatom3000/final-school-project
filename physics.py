@@ -1,3 +1,4 @@
+from math import sqrt
 from random import uniform
 
 import numpy as np
@@ -14,7 +15,7 @@ BOUNCYNESS = 2
 
 class World(Stringable):
     def __init__(self, player: Player, particles: np.array, constant: float = 1):
-        #self.player = player
+        # self.player = player
         self.particles = particles
         self.constant = constant
 
@@ -29,17 +30,21 @@ class World(Stringable):
         return cls(player, np.array(particles), constant)
 
 
-    @staticmethod
-    def handle_colisions(particle1, particle2):
-        particle1.velocity = BOUNCYNESS * (particle1.velocity * (
-                    particle1.mass - particle2.mass) + 2 * particle2.mass * particle2.velocity) / (
-                                         particle1.mass + particle2.mass)
-        particle2.velocity = BOUNCYNESS * (particle2.velocity * (
-                    particle2.mass - particle1.mass) + 2 * particle1.mass * particle1.velocity) / (
-                                         particle1.mass + particle2.mass)
+    def merge_bodies(a, b):
+        name = a.name + " + " + b.name
+        mass = a.m + b.m
+        pos = [
+            a.pos[0] * a.m / mass + b.pos[0] * b.m / mass,
+            a.pos[1] * a.m / mass + b.pos[1] * b.m / mass
+        ]
+        velocity = [
+            a.v[0] * a.m / mass + b.v[0] * b.m / mass,
+            a.v[1] * a.m / mass + b.v[1] * b.m / mass
+        ]
 
-        #particle1.has_colisioned = COLISION_COOLDOWN
-        particle2.has_colisioned = COLISION_COOLDOWN
+        radius = merge_radius(a, b)
+
+        return Body(name, pos, acceleration, velocity, mass, color, radius)
 
     def tick(self, dtime: float):
         for particle in np.append(self.particles, []):
@@ -58,12 +63,12 @@ class World(Stringable):
                 for other_particle in self.particles[self.particles != particle]:
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) <= particle.radius + other_particle.radius:
-                        self.handle_colisions(particle, other_particle)
+                        self.particles.append()
 
             particle.position += particle.velocity * dtime
 
         for particle in np.append(self.particles, []):
-            particle.has_colisioned = max(0, particle.has_colisioned - 1)
+
 
     def __iter__(self):
         return iter(self.particles)
