@@ -1,11 +1,11 @@
-from math import sqrt, pi
+from math import sqrt
 
 import numpy as np
 import pygame
 
 from utils import Stringable
 
-RADIUS_FACTOR = pi
+RADIUS_FACTOR = np.pi
 
 
 class Particle(Stringable):
@@ -15,7 +15,7 @@ class Particle(Stringable):
             position: np.array = np.array([0.0, 0.0]),
             velocity: np.array = np.array([0.0, 0.0]),
             acceleration: np.array = np.array([0.0, 0.0]),
-            radius: float = None,
+            radius=None,
             color: tuple = (255, 255, 255)
     ):
         self.mass = mass
@@ -25,7 +25,7 @@ class Particle(Stringable):
         self.velocity = velocity
         self.acceleration = acceleration
         self.forces = np.array([])
-        self.has_colisioned = False
+        self.merged = False
 
         self.color = color
 
@@ -35,3 +35,14 @@ class Particle(Stringable):
 
     def get_rect(self):
         return pygame.Rect(center=self.position, width=self.radius, height=self.radius)
+
+    def merge(self, other):
+        new_mass = self.mass + other.mass
+        self.position = (self.position * self.mass + other.position * other.mass) / new_mass
+        self.velocity = (self.velocity * self.mass + other.velocity * other.mass) / new_mass
+        self.mass = new_mass
+        self.radius = RADIUS_FACTOR * sqrt(self.mass)
+        return self
+
+    def test(self):
+        return True
