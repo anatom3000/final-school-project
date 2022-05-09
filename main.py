@@ -12,7 +12,7 @@ BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([960, 720])
 BASE_MASS = 1
-G = 1e5
+G = 1e2m
 
 pygame.init()
 
