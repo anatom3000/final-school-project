@@ -13,3 +13,16 @@ class Stringable:
 
 def unit(a):
     return a / np.linalg.norm(a)
+
+
+def lerp(a, b, x):
+    """
+    Basic linear interpolation.
+    In:
+        a is the starting point (float or vector/numpy array)
+        b is the ending point (float or vector/numpy array)
+        x is the interpolation amount
+    Out:
+        the lerp between a and b at x
+    """
+    return (1 - x) * a + x * b

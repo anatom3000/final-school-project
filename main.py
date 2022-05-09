@@ -12,7 +12,7 @@ BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([960, 720])
 BASE_MASS = 1
-G = 1e2m
+G = 1e5
 
 pygame.init()
 
@@ -32,20 +32,32 @@ clock = pygame.time.Clock()
 tick_physics = False
 running = True
 speed = 1
+
+propulsion = np.array([0, 0])
+force_propulsion = 1
+
 while running:
+    propulsion = np.array([0, 0])
     for ev in pygame.event.get():
         if ev.type == QUIT:
             pygame.quit()
             exit(0)
         if ev.type == KEYUP:
-            if ev.key == K_SPACE: tick_physics = not tick_physics
+            if ev.key == K_SPACE:
+                tick_physics = not tick_physics
+
             if ev.key == K_DOWN:
-                speed -= 1
+                propulsion += [0, -1]
+                # speed -= 1
                 if speed == 0: speed = -1
             if ev.key == K_UP:
-                speed += 1
+                propulsion += [0, -1]
+                # speed += 1
                 if speed == 0: speed = 1
-
+            if ev.key == K_LEFT:
+                propulsion += [0, -1]
+            if ev.key == K_RIGHT:
+                propulsion += [0, 1]
         if ev.type == MOUSEBUTTONDOWN:
             # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
             pass  # (for now)
@@ -53,7 +65,7 @@ while running:
     dt = clock.tick(60) / 1000
 
     screen.fill(BLACK)
-
+    player.moteur = propulsion * force_propulsion
     if tick_physics:
         world.tick(dt / speed)
         screen.fill(LIGHT_BLUE)

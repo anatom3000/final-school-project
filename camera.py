@@ -8,12 +8,14 @@ from utils import Stringable
 VELOCITY_TO_ZOOM_FACTOR = 0.5
 
 
-
-
 class Camera(Stringable):
     def __init__(self, resolution: np.array, zoom: float = 2.0, position: np.array = None):
         self.position = np.array([0.0, 0.0]) if position is None else position
         self.zoom = zoom
+
+        self.target_position = self.position
+        self.target_zoom = self.zoom
+
         self.resolution = resolution
 
     def move(self, deplacement: np.array):
@@ -50,3 +52,4 @@ class Camera(Stringable):
 
     def convert_radius(self, radius: float):
         return radius * self.zoom
+

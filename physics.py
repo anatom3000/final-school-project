@@ -11,6 +11,7 @@ COLISION_COOLDOWN = 3  # in frames
 BOUNCYNESS = 2
 GLOBAL_SIMULATION_DISTANCE = 256
 LOCAL_SIMULATION_DISTANCE = 64
+RENDER_DISTANCE = 10
 
 
 class World(Stringable):
@@ -18,6 +19,7 @@ class World(Stringable):
         self.player = player
         self.particles = particles
         self.constant = constant
+        self.classified_particules = []
 
     @classmethod
     def random(cls, player: Player, min_position: np.array, max_position: np.array, particle_number: int = 10,
@@ -32,8 +34,9 @@ class World(Stringable):
         return cls(player, np.array(particles), constant)
 
     def tick(self, dtime: float):
+        self.particles = np.array(sorted(self.particles, key=lambda particule: particule.position[0]))
         all_particles = np.append(self.particles, [self.player])
-        for particle in all_particles:
+        for index_1, particle in enumerate(all_particles):
             particle.acceleration = np.zeros(2)
             for other_particle in self.particles[self.particles != particle]:
                 particle_to_other_particle = other_particle.position - particle.position
@@ -42,19 +45,32 @@ class World(Stringable):
                     partial_acceleration = other_particle.mass / (distance ** 2)
                     partial_acceleration *= unit(particle_to_other_particle)
                     particle.acceleration += partial_acceleration
-
+            if particle.is_player:
+                particle.acceleration += particle.moteur
             particle.acceleration *= self.constant
             particle.velocity = particle.acceleration * dtime
-            if not particle.merged:
-                for other_particle in self.particles[self.particles != particle]:
+            if not (particle.merged or particle.is_player):
+                for index_2, other_particle in enumerate(
+                        self.particles[self.particles != particle][index_1 - 2: index_1 + 2]):
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) <= particle.radius + other_particle.radius:
+                        # print("particule_1:  ", index_1 )
+                        # print("particule_2:  ", index_2)
+                        # print("________________________________________________________________")
                         particle.merge(other_particle)
                         other_particle.merged = True
+            if particle.is_player:
+                for index_2, other_particle in enumerate(self.particles[self.particles != particle]):
+                    distance = other_particle.position - particle.position
+                    if np.linalg.norm(distance) >= RENDER_DISTANCE:
+                        particle.away_from_player = True
+                    elif np.linalg.norm(distance) <= particle.radius + other_particle.radius:
+                        particle.acceleration = np.array([0, 0])
+                        particle.velocity = np.array([0, 0])
 
             particle.position += particle.velocity * dtime
 
-        self.particles = self.particles[[not p.merged for p in self.particles]]
+        self.particles = self.particles[[not (p.merged or p.away_from_player) for p in self.particles]]
 
     def __iter__(self):
         return iter(self.particles)
