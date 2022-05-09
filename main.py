@@ -20,14 +20,15 @@ player = Player(velocity=np.array((100.0, 0.0)))
 
 BOUND = 100.0
 
-world = World.random(player, particle_number=50, constant=G, min_position=np.array([BOUND, BOUND]),
+world = World.random(player, particle_number=100, constant=G, min_position=np.array([BOUND, BOUND]),
                      max_position=np.array([-BOUND, -BOUND]), max_mass=0.1)
 
 camera = Camera(RESOLUTION)
-camera.zoom = 2.0
 
 screen = pygame.display.set_mode(RESOLUTION)
 clock = pygame.time.Clock()
+
+camera.follow(player, smoothing=False)
 
 tick_physics = False
 running = True
@@ -70,14 +71,18 @@ while running:
         world.tick(dt / speed)
         screen.fill(LIGHT_BLUE)
 
-    camera.follow(player, offset=np.array([0, 0]))
+    camera.follow(player)
+    camera.tick(dt / speed)
 
     player.display(screen, camera)
     for particle in world:
         particle.display(screen, camera)
 
-    # green dot at (O, O) for debugging purposes
+    # green dot at (O, O) in the coordinate plane for debugging purposes
     pygame.draw.circle(screen, (0, 255, 0), camera.convert_position(np.array([0.0, 0.0])), 1)
+
+    # yellow dot at the center of the screen for debugging purposes
+    pygame.draw.circle(screen, (255, 255, 0), RESOLUTION/2, 1)
 
     pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)} - Speed: {speed}")
 
