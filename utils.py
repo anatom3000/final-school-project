@@ -26,3 +26,7 @@ def lerp(a, b, x):
         the lerp between a and b at x
     """
     return (1 - x) * a + x * b
+
+
+def clamp(minimum, x, maximum):
+    return min(max(x, minimum), maximum)

@@ -8,18 +8,20 @@ from utils import Stringable
 from random import randint
 
 RADIUS_FACTOR = np.pi
+MAX_MASS = 20.0
 
 
 class Particle(Stringable):
+    is_player = False
+
     def __init__(
             self,
             mass: float,
-            position: np.array = np.array([0.0, 0.0]),
-            velocity: np.array = np.array([0.0, 0.0]),
-            acceleration: np.array = np.array([0.0, 0.0]),
-            radius=None,
-            color: tuple = (255, 255, 255),
-            is_joueur = False
+            position: np.array = np.zeros(2),
+            velocity: np.array = np.zeros(2),
+            acceleration: np.array = np.zeros(2),
+            radius: float = None,
+            color: tuple = None
     ):
         self.mass = mass
         self.position = position
@@ -30,11 +32,8 @@ class Particle(Stringable):
         self.forces = np.array([])
         self.merged = False
         self.away_from_player = False
-        self.is_player = is_joueur
 
-        if color == (255, 255, 255):
-            self.color = (randint(0, 255), randint(0, 255), randint(0, 255))
-        else: self.color = color
+        self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 
     def display(self, surface: pygame.Surface, camera):
         pygame.draw.circle(surface, self.color, camera.convert_position(self.position),
@@ -47,6 +46,6 @@ class Particle(Stringable):
         new_mass = self.mass + other.mass
         self.position = (self.position * self.mass + other.position * other.mass) / new_mass
         self.velocity = (self.velocity * self.mass + other.velocity * other.mass) / new_mass
-        self.mass = new_mass
+        self.mass = min(MAX_MASS, new_mass)
         self.radius = RADIUS_FACTOR * sqrt(self.mass)
         return self

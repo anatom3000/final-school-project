@@ -60,23 +60,25 @@ class Camera(Stringable):
 
     def follow(self, particle: Particle, smoothing=True):
         if smoothing:
-            self.position = self.zoom * particle.position - self.resolution / 2
+            self.position = self.zoom * particle.position
             self.zoom = Camera._convert_velocity_to_zoom(particle.velocity)
         else:
-            self._position = self.zoom * particle.position - self.resolution / 2
+            self._position = self.zoom * particle.position
             self._zoom = Camera._convert_velocity_to_zoom(particle.velocity)
 
     def convert_position(self, position: np.array):
-        # return self.zoom * position + self.resolution / 2 - self.position
-        return self.zoom * position - self.position
+        return self.zoom * position + self.resolution / 2 - self.position
 
     def convert_radius(self, radius: float):
         return radius * self.zoom
+
+    def real_position_from_screen(self, position):
+        """
+        Inverse function of convert_position.
+        """
+        return (position + self.position - self.resolution / 2) / self.zoom
 
     def tick(self, dt):
         self._position = lerp(self._position, self._target_position, dt*POSITION_SMOOTHING_SPEED)
 
         self._zoom = lerp(self._zoom, self._target_zoom, dt*ZOOM_SMOOTHING_SPEED)
-
-        print(f"Position: {self.position}")
-        print(f"Zoom: {self.zoom}")

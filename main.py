@@ -7,12 +7,18 @@ from pygame.locals import *
 from camera import Camera
 from physics import World
 from player import Player
+from utils import clamp
 
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([960, 720])
+PROPULSION_INIT = 0.005
+PROPULSION_STEP = 0.005
+PROPULSION_MAX = 0.1
 BASE_MASS = 1
 G = 1e5
+
+DEBUGGING = False
 
 pygame.init()
 
@@ -29,16 +35,14 @@ screen = pygame.display.set_mode(RESOLUTION)
 clock = pygame.time.Clock()
 
 camera.follow(player, smoothing=False)
+player.mouse_attraction = PROPULSION_INIT
+player.movement_cooldown = 5.0
 
 tick_physics = False
 running = True
 speed = 1
 
-propulsion = np.array([0, 0])
-force_propulsion = 1
-
 while running:
-    propulsion = np.array([0, 0])
     for ev in pygame.event.get():
         if ev.type == QUIT:
             pygame.quit()
@@ -48,41 +52,46 @@ while running:
                 tick_physics = not tick_physics
 
             if ev.key == K_DOWN:
-                propulsion += [0, -1]
-                # speed -= 1
-                if speed == 0: speed = -1
+                pass
             if ev.key == K_UP:
-                propulsion += [0, -1]
-                # speed += 1
-                if speed == 0: speed = 1
+                pass
             if ev.key == K_LEFT:
-                propulsion += [0, -1]
+                pass
             if ev.key == K_RIGHT:
-                propulsion += [0, 1]
+                pass
         if ev.type == MOUSEBUTTONDOWN:
             # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
-            pass  # (for now)
+            if ev.button == 4:
+                player.mouse_attraction = clamp(0, player.mouse_attraction + PROPULSION_STEP, PROPULSION_MAX)
+            if ev.button == 5:
+                player.mouse_attraction = clamp(0, player.mouse_attraction - PROPULSION_STEP, PROPULSION_MAX)
 
     dt = clock.tick(60) / 1000
 
-    screen.fill(BLACK)
-    player.moteur = propulsion * force_propulsion
     if tick_physics:
-        world.tick(dt / speed)
+        print(player.mouse_attraction)
         screen.fill(LIGHT_BLUE)
+        if player.movement_cooldown == 0:
+            player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
-    camera.follow(player)
-    camera.tick(dt / speed)
+        world.tick(dt / speed)
+
+        camera.follow(player)
+        camera.tick(dt / speed)
+    else:
+        screen.fill(BLACK)
+
 
     player.display(screen, camera)
     for particle in world:
         particle.display(screen, camera)
 
-    # green dot at (O, O) in the coordinate plane for debugging purposes
-    pygame.draw.circle(screen, (0, 255, 0), camera.convert_position(np.array([0.0, 0.0])), 1)
+    if DEBUGGING:
+        # green dot at (O, O) in the coordinate plane for debugging purposes
+        pygame.draw.circle(screen, (0, 255, 0), camera.convert_position(np.array([0.0, 0.0])), 1)
 
-    # yellow dot at the center of the screen for debugging purposes
-    pygame.draw.circle(screen, (255, 255, 0), RESOLUTION/2, 1)
+        # yellow dot at the center of the screen for debugging purposes
+        pygame.draw.circle(screen, (255, 255, 0), RESOLUTION/2, 1)
 
     pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)} - Speed: {speed}")
 

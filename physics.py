@@ -8,10 +8,11 @@ from utils import Stringable, unit
 
 CHUNK_SIZE = 64
 COLISION_COOLDOWN = 3  # in frames
-BOUNCYNESS = 2
 GLOBAL_SIMULATION_DISTANCE = 256
+BOUNCYNESS = 2
+MOVEMENT_COOLDOWN = 2.0
 LOCAL_SIMULATION_DISTANCE = 64
-RENDER_DISTANCE = 10
+RENDER_DISTANCE = 400  # valeur a ajuster car 100% random
 
 
 class World(Stringable):
@@ -45,8 +46,12 @@ class World(Stringable):
                     partial_acceleration = other_particle.mass / (distance ** 2)
                     partial_acceleration *= unit(particle_to_other_particle)
                     particle.acceleration += partial_acceleration
+
             if particle.is_player:
-                particle.acceleration += particle.moteur
+                distance = particle.mouse_position - particle.position
+                if np.linalg.norm(distance) > (particle.radius + 0.5) and particle.movement_cooldown == 0:
+                    particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance)**0.5 * unit(distance)
+
             particle.acceleration *= self.constant
             particle.velocity = particle.acceleration * dtime
             if not (particle.merged or particle.is_player):
@@ -54,19 +59,20 @@ class World(Stringable):
                         self.particles[self.particles != particle][index_1 - 2: index_1 + 2]):
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) <= particle.radius + other_particle.radius:
-                        # print("particule_1:  ", index_1 )
-                        # print("particule_2:  ", index_2)
-                        # print("________________________________________________________________")
                         particle.merge(other_particle)
                         other_particle.merged = True
+
             if particle.is_player:
+                particle.movement_cooldown = max(0, particle.movement_cooldown-dtime)
                 for index_2, other_particle in enumerate(self.particles[self.particles != particle]):
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) >= RENDER_DISTANCE:
-                        particle.away_from_player = True
+                        other_particle.away_from_player = True
                     elif np.linalg.norm(distance) <= particle.radius + other_particle.radius:
                         particle.acceleration = np.array([0, 0])
-                        particle.velocity = np.array([0, 0])
+                        particle.velocity = particle.velocity * -BOUNCYNESS
+                        particle.movement_cooldown = MOVEMENT_COOLDOWN
+                        other_particle.away_from_player = True
 
             particle.position += particle.velocity * dtime
 
