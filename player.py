@@ -5,6 +5,9 @@ from particle import Particle
 
 TRAIL_COLOR = (0, 255, 0)
 TRAIL_SIZE = 1.0
+USE_TRAIL = False
+
+MOUSE_COLOR = (0, 0, 255)
 
 
 class Player(Particle):
@@ -41,11 +44,18 @@ class Player(Particle):
         particle_surface = pygame.Surface((on_screen_radius * 2, on_screen_radius * 2), pygame.SRCALPHA)
         pygame.draw.circle(particle_surface, self.color, (on_screen_radius, on_screen_radius), on_screen_radius)
 
-        trail_radius = on_screen_radius * TRAIL_SIZE
-        trail_surface = pygame.Surface((2 * trail_radius, 2 * trail_radius), pygame.SRCALPHA)
-        pygame.draw.circle(trail_surface, TRAIL_COLOR, (trail_radius, trail_radius), on_screen_radius * TRAIL_SIZE)
+        if USE_TRAIL:
+            trail_radius = on_screen_radius * TRAIL_SIZE
+            trail_surface = pygame.Surface((2 * trail_radius, 2 * trail_radius), pygame.SRCALPHA)
+            pygame.draw.circle(trail_surface, TRAIL_COLOR, (trail_radius, trail_radius), on_screen_radius * TRAIL_SIZE)
+            self.transparent_surface.blit(trail_surface,
+                                          trail_surface.get_rect(center=camera.convert_position(self.position)))
 
-        self.transparent_surface.blit(trail_surface, trail_surface.get_rect(center=camera.convert_position(self.position)))
-        self.transparent_surface.blit(particle_surface, particle_surface.get_rect(center=camera.convert_position(self.position)))
+        self.transparent_surface.blit(particle_surface,
+                                      particle_surface.get_rect(center=camera.convert_position(self.position)))
 
         surface.blit(self.transparent_surface, (0, 0))
+
+    def display_mouse(self, surface: pygame.Surface, camera):
+        pygame.draw.circle(surface, MOUSE_COLOR, camera.convert_position(self.mouse_position),
+                           self.mouse_attraction * 500, width=int(self.mouse_attraction * 20 + 1))

@@ -36,7 +36,6 @@ class Particle(Stringable):
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 
     def display(self, surface: pygame.Surface, camera):
-
         pygame.draw.circle(surface, self.color, camera.convert_position(self.position),
                            camera.convert_radius(self.radius))
 

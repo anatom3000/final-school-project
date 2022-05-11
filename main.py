@@ -8,6 +8,7 @@ from camera import Camera
 from physics import World
 from player import Player
 from utils import clamp
+from compteur import compteur_vitesse
 
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
@@ -22,7 +23,7 @@ DEBUGGING = False
 
 pygame.init()
 
-player = Player(screen_resolution=RESOLUTION, velocity=np.array((100.0, 0.0)))
+player = Player(RESOLUTION, velocity=np.array((100.0, 0.0)))
 
 BOUND = 100.0
 
@@ -32,13 +33,15 @@ world = World.random(player, particle_number=100, constant=G, min_position=np.ar
 camera = Camera(RESOLUTION)
 
 screen = pygame.display.set_mode(RESOLUTION)
+pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
 
 camera.follow(player, smoothing=False)
 player.mouse_attraction = PROPULSION_INIT
 player.movement_cooldown = 5.0
 
-tick_physics = False
+tick_physics = True
+show_ui = True
 running = True
 speed = 1
 
@@ -50,15 +53,9 @@ while running:
         if ev.type == KEYUP:
             if ev.key == K_SPACE:
                 tick_physics = not tick_physics
+            if ev.key == K_F1:
+                show_ui = not show_ui
 
-            if ev.key == K_DOWN:
-                pass
-            if ev.key == K_UP:
-                pass
-            if ev.key == K_LEFT:
-                pass
-            if ev.key == K_RIGHT:
-                pass
         if ev.type == MOUSEBUTTONDOWN:
             # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
             if ev.button == 4:
@@ -66,23 +63,28 @@ while running:
             if ev.button == 5:
                 player.mouse_attraction = clamp(0, player.mouse_attraction - PROPULSION_STEP, PROPULSION_MAX)
 
-    dt = clock.tick(60) / 1000
+    dt = clock.tick() / 1000
+
+    player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
     if tick_physics:
         screen.fill(LIGHT_BLUE)
-        if player.movement_cooldown == 0:
-            player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
         world.tick(dt / speed)
 
         camera.follow(player)
         camera.tick(dt / speed)
     else:
-        screen.fill(BLACK)
+        screen.fill(LIGHT_BLUE)
 
     player.display(screen, camera)
     for particle in world:
         particle.display(screen, camera)
+    player.display_mouse(screen, camera)
+
+    if show_ui:
+        compteur_vitesse.update(int(np.linalg.norm(player.velocity)))
+        compteur_vitesse.display(screen)
 
     if DEBUGGING:
         # green dot at (O, O) in the coordinate plane for debugging purposes
