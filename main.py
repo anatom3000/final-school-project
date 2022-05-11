@@ -22,7 +22,7 @@ DEBUGGING = False
 
 pygame.init()
 
-player = Player(velocity=np.array((100.0, 0.0)))
+player = Player(screen_resolution=RESOLUTION, velocity=np.array((100.0, 0.0)))
 
 BOUND = 100.0
 
@@ -69,7 +69,6 @@ while running:
     dt = clock.tick(60) / 1000
 
     if tick_physics:
-        print(player.mouse_attraction)
         screen.fill(LIGHT_BLUE)
         if player.movement_cooldown == 0:
             player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
@@ -81,7 +80,6 @@ while running:
     else:
         screen.fill(BLACK)
 
-
     player.display(screen, camera)
     for particle in world:
         particle.display(screen, camera)
@@ -91,7 +89,7 @@ while running:
         pygame.draw.circle(screen, (0, 255, 0), camera.convert_position(np.array([0.0, 0.0])), 1)
 
         # yellow dot at the center of the screen for debugging purposes
-        pygame.draw.circle(screen, (255, 255, 0), RESOLUTION/2, 1)
+        pygame.draw.circle(screen, (255, 255, 0), RESOLUTION / 2, 1)
 
     pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)} - Speed: {speed}")
 
