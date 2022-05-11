@@ -13,11 +13,11 @@ from utils import clamp
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([960, 720])
-PROPULSION_INIT = 0.005
-PROPULSION_STEP = 0.005
-PROPULSION_MAX = 0.1
+PROPULSION_INIT = 0.0002
+PROPULSION_STEP = 0.0002
+PROPULSION_MAX = 0.05
 BASE_MASS = 1
-G = 1e5
+G = 1e6
 
 DEBUGGING = False
 
@@ -36,7 +36,7 @@ screen = pygame.display.set_mode(RESOLUTION)
 pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
 
-compteur_vitesse = Compteur(label="Speed :")
+compteur_vitesse = Compteur(label="Speed : ")
 
 camera.follow(player, smoothing=False)
 player.mouse_attraction = PROPULSION_INIT
@@ -46,6 +46,8 @@ tick_physics = True
 show_ui = True
 running = True
 speed = 1
+
+f = 0
 
 while running:
     for ev in pygame.event.get():
@@ -66,6 +68,7 @@ while running:
                 player.mouse_attraction = clamp(0, player.mouse_attraction - PROPULSION_STEP, PROPULSION_MAX)
 
     dt = clock.tick() / 1000
+    f += 1
 
     player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
@@ -96,5 +99,8 @@ while running:
         pygame.draw.circle(screen, (255, 255, 0), RESOLUTION / 2, 1)
 
     pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)} - Speed: {speed}")
+
+    if f % 120 == 0:
+        print(player.velocity)
 
     pygame.display.flip()

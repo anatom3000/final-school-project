@@ -4,7 +4,7 @@ import numpy as np
 
 from particle import Particle
 from player import Player
-from utils import Stringable, unit
+from utils import Stringable, unit, clamp
 
 CHUNK_SIZE = 64
 COLISION_COOLDOWN = 3  # in frames
@@ -13,6 +13,7 @@ BOUNCYNESS = 2
 MOVEMENT_COOLDOWN = 2.0
 LOCAL_SIMULATION_DISTANCE = 64
 RENDER_DISTANCE = 400  # valeur a ajuster car 100% random
+MAX_SPEED = 50
 
 
 class World(Stringable):
@@ -54,7 +55,7 @@ class World(Stringable):
                         distance)
 
             particle.acceleration *= self.constant
-            particle.velocity = particle.acceleration * dtime
+            particle.velocity = np.clip(particle.acceleration * dtime, -MAX_SPEED*np.ones(2), MAX_SPEED*np.ones(2))
             if not (particle.merged or particle.is_player):
                 for index_2, other_particle in enumerate(
                         self.particles[self.particles != particle][index_1 - 2: index_1 + 2]):

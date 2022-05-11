@@ -58,4 +58,4 @@ class Player(Particle):
 
     def display_mouse(self, surface: pygame.Surface, camera):
         pygame.draw.circle(surface, MOUSE_COLOR, camera.convert_position(self.mouse_position),
-                           self.mouse_attraction * 500, width=int(self.mouse_attraction * 20 + 1))
+                           self.mouse_attraction * 5000, width=int(self.mouse_attraction * 200 + 1))
