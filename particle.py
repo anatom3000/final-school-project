@@ -1,11 +1,10 @@
 from math import sqrt
+from random import randint
 
 import numpy as np
 import pygame
 
 from utils import Stringable
-
-from random import randint
 
 RADIUS_FACTOR = np.pi
 MAX_MASS = 20.0

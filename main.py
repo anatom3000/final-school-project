@@ -5,10 +5,10 @@ import pygame
 from pygame.locals import *
 
 from camera import Camera
+from compteur import Compteur
 from physics import World
 from player import Player
 from utils import clamp
-from compteur import compteur_vitesse
 
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
@@ -35,6 +35,8 @@ camera = Camera(RESOLUTION)
 screen = pygame.display.set_mode(RESOLUTION)
 pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
+
+compteur_vitesse = Compteur(fond_velocity, label="vitesse :")
 
 camera.follow(player, smoothing=False)
 player.mouse_attraction = PROPULSION_INIT

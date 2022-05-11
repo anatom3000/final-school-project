@@ -79,6 +79,6 @@ class Camera(Stringable):
         return (position + self.position - self.resolution / 2) / self.zoom
 
     def tick(self, dt):
-        self._position = lerp(self._position, self._target_position, dt*POSITION_SMOOTHING_SPEED)
+        self._position = lerp(self._position, self._target_position, dt * POSITION_SMOOTHING_SPEED)
 
-        self._zoom = lerp(self._zoom, self._target_zoom, dt*ZOOM_SMOOTHING_SPEED)
+        self._zoom = lerp(self._zoom, self._target_zoom, dt * ZOOM_SMOOTHING_SPEED)

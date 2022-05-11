@@ -4,7 +4,7 @@ import pygame as pygame
 pygame.init()
 
 NB_REFRESH_FRAME = 10
-POLICE = pygame.font.Font("Computerfont.ttf", 72)
+POLICE = pygame.font.Font("assets/Computerfont.ttf", 72)
 
 
 class Compteur():
@@ -13,7 +13,7 @@ class Compteur():
         self.dimenssion = np.array(dim)
         self.txt = "0"
         self.surface = pygame.Surface(dim)
-        self.image = img
+        self.image = pygame.image.load('assets/compteur.png')
         self.police = pol
         self.label = label
         self.refresh = NB_REFRESH_FRAME
@@ -32,9 +32,5 @@ class Compteur():
         img_txt = pygame.transform.scale(self.police.render(self.txt, True, pygame.Color("#01FDF7")), self.dimenssion)
         reduce_factor = self.dimenssion[0] / img_txt.get_size()[0] * 0.8
         self.surface.blit(pygame.transform.scale(img_txt, [int(img_txt.get_size()[0] * reduce_factor),
-                                                       int(img_txt.get_size()[1] * reduce_factor)]), (20, 3))
+                                                           int(img_txt.get_size()[1] * reduce_factor)]), (20, 3))
         ecran.blit(self.surface, self.position)
-
-
-fond_velocity = pygame.image.load('vitesse.png')
-compteur_vitesse = Compteur(fond_velocity, label="vitesse :")

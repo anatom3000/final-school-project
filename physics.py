@@ -50,7 +50,8 @@ class World(Stringable):
             if particle.is_player:
                 distance = particle.mouse_position - particle.position
                 if np.linalg.norm(distance) > (particle.radius + 0.5) and particle.movement_cooldown == 0:
-                    particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance)**0.5 * unit(distance)
+                    particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance) ** 0.5 * unit(
+                        distance)
 
             particle.acceleration *= self.constant
             particle.velocity = particle.acceleration * dtime
@@ -63,7 +64,7 @@ class World(Stringable):
                         other_particle.merged = True
 
             if particle.is_player:
-                particle.movement_cooldown = max(0, particle.movement_cooldown-dtime)
+                particle.movement_cooldown = max(0, particle.movement_cooldown - dtime)
                 for index_2, other_particle in enumerate(self.particles[self.particles != particle]):
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) >= RENDER_DISTANCE:
