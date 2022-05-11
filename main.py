@@ -36,7 +36,7 @@ screen = pygame.display.set_mode(RESOLUTION)
 pygame.mouse.set_visible(False)
 clock = pygame.time.Clock()
 
-compteur_vitesse = Compteur(fond_velocity, label="vitesse :")
+compteur_vitesse = Compteur(label="Speed :")
 
 camera.follow(player, smoothing=False)
 player.mouse_attraction = PROPULSION_INIT
