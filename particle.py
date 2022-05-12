@@ -4,7 +4,7 @@ from random import randint
 import numpy as np
 import pygame
 
-from constants import RADIUS_FACTOR, MAX_MASS
+from constants import PARTICLE_MASS_TO_RADIUS_FACTOR, MAX_PARTICLE_MASS
 from utils import Stringable
 
 
@@ -20,13 +20,12 @@ class Particle(Stringable):
     ):
         self.mass = mass
         self.position = position
-        self.radius = RADIUS_FACTOR * sqrt(self.mass) if radius is None else radius
+        self.radius = PARTICLE_MASS_TO_RADIUS_FACTOR * sqrt(self.mass) if radius is None else radius
 
         self.velocity = velocity
         self.acceleration = acceleration
         self.forces = np.array([])
-        self.merged = False
-        self.away_from_player = False
+        self.to_delete = False
 
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 
@@ -38,6 +37,6 @@ class Particle(Stringable):
         new_mass = self.mass + other.mass
         self.position = (self.position * self.mass + other.position * other.mass) / new_mass
         self.velocity = (self.velocity * self.mass + other.velocity * other.mass) / new_mass
-        self.mass = min(MAX_MASS, new_mass)
-        self.radius = RADIUS_FACTOR * sqrt(self.mass)
+        self.mass = min(MAX_PARTICLE_MASS, new_mass)
+        self.radius = PARTICLE_MASS_TO_RADIUS_FACTOR * sqrt(self.mass)
         return self

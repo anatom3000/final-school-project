@@ -1,38 +1,42 @@
 import numpy as np
 
-BLACK = (0, 0, 0)
-FPS_CAP = 120
-DARK_BLUE = (0, 0, 16)
-RESOLUTION = np.array([960, 720])
-PROPULSION_INIT = 2e2
-PROPULSION_STEP = 2e2
-PROPULSION_MAX = 5e4
-BASE_MASS = 1
-G = 3e6
+"""
+Contient toutes les constantes utilisées dans le jeu.
+Permet d'être utilisé comme un fichier de configuration.
+"""
 
+# Configuration techniques/relatives à pygame
+FPS_CAP = 120
+RESOLUTION = np.array([960, 720])
 DEBUGGING = False
 
-BLACK_HOLE_RADIUS = 10
-BLACK_HOLE_COLOR = (255, 255, 32)
-BLACK_HOLE_MASS_MULTIPLIER = 10.0
+# Couleurs
+BACKGROUND_COLOR = (0, 0, 16)
+MOUSE_CURSOR_COLOR = (0, 0, 255)
 
-TRAIL_COLOR = 0.5
-TRAIL_LENGHT = 16
-TRAIL_FREQUENCY = 0.08
-
-MOUSE_COLOR = (0, 0, 255)
-
-CHUNK_SIZE = 64
-COLISION_COOLDOWN = 3  # in frames
-GLOBAL_SIMULATION_DISTANCE = 256
+# Configuration de la physique du monde
+G = 3e6
 BOUNCYNESS = 2
 MOVEMENT_COOLDOWN = 2.0
 LOCAL_SIMULATION_DISTANCE = 64
-RENDER_DISTANCE = 400  # valeur a ajuster car 100% random
+SPAWNING_DISTANCE = 390
+DESPAWNING_DISTANCE = 400
 MAX_ACCELERATION = 50
 
-RADIUS_FACTOR = 10.0
-MAX_MASS = 20.0
+# Configuration de la traction de la souris
+MOUSE_PROPULSION_INIT = 2e2
+MOUSE_PROPULSION_STEP = 2e2
+MOUSE_PROPULSION_MAX = MOUSE_PROPULSION_STEP * 16
 
-POSITION_SMOOTHING_SPEED = 5.0
-ZOOM_SMOOTHING_SPEED = 0.5
+# Configuration des propriétés des particules
+MAX_PARTICLE_MASS = 20.0
+PARTICLE_MASS_TO_RADIUS_FACTOR = 10.0
+
+# Configuration de la trainée du joueur
+PLAYER_TRAIL_COLOR = 0.5
+PLAYER_TRAIL_LENGHT = 16
+PLAYER_TRAIL_DENSITY = 0.08
+
+# Configuration de la caméra
+CAMERA_POSITION_SMOOTHING_SPEED = 5.0
+CAMERA_ZOOM_SMOOTHING_SPEED = 0.5
