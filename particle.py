@@ -4,15 +4,11 @@ from random import randint
 import numpy as np
 import pygame
 
+from constants import RADIUS_FACTOR, MAX_MASS
 from utils import Stringable
-
-RADIUS_FACTOR = 10.0
-MAX_MASS = 20.0
 
 
 class Particle(Stringable):
-    is_player = False
-
     def __init__(
             self,
             mass: float,

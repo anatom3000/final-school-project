@@ -2,11 +2,9 @@ from math import tanh
 
 import numpy as np
 
+from constants import POSITION_SMOOTHING_SPEED, ZOOM_SMOOTHING_SPEED
 from particle import Particle
 from utils import Stringable, lerp
-
-POSITION_SMOOTHING_SPEED = 5.0
-ZOOM_SMOOTHING_SPEED = 0.5
 
 
 class Camera(Stringable):

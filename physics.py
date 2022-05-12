@@ -2,18 +2,11 @@ from random import uniform
 
 import numpy as np
 
+# from black_hole import BlackHole
+from constants import LOCAL_SIMULATION_DISTANCE, MAX_ACCELERATION, RENDER_DISTANCE, BOUNCYNESS, MOVEMENT_COOLDOWN
 from particle import Particle
 from player import Player
 from utils import Stringable, unit
-
-CHUNK_SIZE = 64
-COLISION_COOLDOWN = 3  # in frames
-GLOBAL_SIMULATION_DISTANCE = 256
-BOUNCYNESS = 2
-MOVEMENT_COOLDOWN = 2.0
-LOCAL_SIMULATION_DISTANCE = 64
-RENDER_DISTANCE = 400  # valeur a ajuster car 100% random
-MAX_ACCELERATION = 50
 
 
 class World(Stringable):
@@ -48,10 +41,11 @@ class World(Stringable):
                     partial_acceleration *= unit(particle_to_other_particle)
                     particle.acceleration += partial_acceleration
 
-            particle.acceleration = np.clip(particle.acceleration, -MAX_ACCELERATION * np.ones(2), MAX_ACCELERATION * np.ones(2))
+            particle.acceleration = np.clip(particle.acceleration, -MAX_ACCELERATION * np.ones(2),
+                                            MAX_ACCELERATION * np.ones(2))
             particle.acceleration *= self.constant
 
-            if particle.is_player:
+            if isinstance(particle, Player):
                 distance = particle.mouse_position - particle.position
                 if np.linalg.norm(distance) > (particle.radius + 0.5) and particle.movement_cooldown == 0:
                     particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance) ** 0.5 * unit(
@@ -59,7 +53,7 @@ class World(Stringable):
 
             particle.velocity = particle.acceleration * dtime
 
-            if not (particle.merged or particle.is_player):
+            if not (particle.merged or isinstance(particle, Player)):
                 for index_2, other_particle in enumerate(
                         self.particles[self.particles != particle][index_1 - 2: index_1 + 2]):
                     distance = other_particle.position - particle.position
@@ -67,7 +61,7 @@ class World(Stringable):
                         particle.merge(other_particle)
                         other_particle.merged = True
 
-            if particle.is_player:
+            if isinstance(particle, Player):
                 particle.movement_cooldown = max(0, particle.movement_cooldown - dtime)
                 for index_2, other_particle in enumerate(self.particles[self.particles != particle]):
                     distance = other_particle.position - particle.position

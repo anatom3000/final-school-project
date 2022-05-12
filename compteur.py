@@ -1,8 +1,6 @@
 import numpy as np
 import pygame as pygame
 
-pygame.init()
-
 NB_REFRESH_FRAME = 10
 POLICE = pygame.font.Font("assets/Computerfont.ttf", 72)
 

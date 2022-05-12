@@ -6,20 +6,10 @@ from pygame.locals import *
 
 from camera import Camera
 from compteur import Compteur
+from constants import G, RESOLUTION, PROPULSION_INIT, PROPULSION_STEP, PROPULSION_MAX, FPS_CAP, DARK_BLUE, DEBUGGING
 from physics import World
 from player import Player
 from utils import clamp
-
-BLACK = (0, 0, 0)
-LIGHT_BLUE = (0, 0, 16)
-RESOLUTION = np.array([960, 720])
-PROPULSION_INIT = 2e2
-PROPULSION_STEP = 2e2
-PROPULSION_MAX = 5e4
-BASE_MASS = 1
-G = 3e6
-
-DEBUGGING = False
 
 pygame.init()
 
@@ -48,7 +38,6 @@ running = True
 speed = 1
 tick_player = False
 
-
 while running:
     for ev in pygame.event.get():
         if ev.type == QUIT:
@@ -69,19 +58,19 @@ while running:
             if ev.button == 5:
                 player.mouse_attraction = clamp(0, player.mouse_attraction - PROPULSION_STEP, PROPULSION_MAX)
 
-    dt = clock.tick() / 1000
+    dt = clock.tick(FPS_CAP) / 1000
 
     player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
     if tick_physics:
-        screen.fill(LIGHT_BLUE)
+        screen.fill(DARK_BLUE)
 
         world.tick(dt / speed, tick_player)
 
         camera.follow(player)
         camera.tick(dt / speed)
     else:
-        screen.fill(LIGHT_BLUE)
+        screen.fill(DARK_BLUE)
 
     player.display(screen, camera, dt)
     for particle in world:

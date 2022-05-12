@@ -1,20 +1,12 @@
 import numpy as np
 import pygame
 
+from constants import TRAIL_COLOR, TRAIL_LENGHT, TRAIL_FREQUENCY, MOUSE_COLOR
 from particle import Particle
 from utils import draw_circle_alpha
 
-TRAIL_COLOR = 0.5
-TRAIL_LENGHT = 16
-USE_TRAIL = False
-TRAIL_FREQUENCY = 0.08
-
-MOUSE_COLOR = (0, 0, 255)
-
 
 class Player(Particle):
-    is_player = True
-
     def __init__(self, position: np.array = np.array([0.0, 0.0]),
                  velocity: np.array = np.array([0.0, 0.0])):
         super().__init__(1e-16, position, radius=3.0, velocity=velocity)
@@ -41,7 +33,7 @@ class Player(Particle):
 
     @color.setter
     def color(self, value):
-        pass
+        pass  # control is an illusion
 
     def display(self, surface: pygame.Surface, camera, dt: float = 0.0):
         self.last_trail_update += dt
