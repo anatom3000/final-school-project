@@ -2,28 +2,22 @@ import numpy as np
 import pygame
 
 from particle import Particle
+from utils import draw_circle_alpha
 
 TRAIL_COLOR = 0.5
-TRAIL_LENGHT = 8
+TRAIL_LENGHT = 16
 USE_TRAIL = False
 TRAIL_FREQUENCY = 0.08
 
 MOUSE_COLOR = (0, 0, 255)
 
 
-def draw_circle_alpha(surface, color, center, radius):
-    target_rect = pygame.Rect(center, (0, 0)).inflate((radius * 2, radius * 2))
-    shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
-    pygame.draw.circle(shape_surf, color, (radius, radius), radius)
-    surface.blit(shape_surf, target_rect)
-
-
 class Player(Particle):
     is_player = True
 
-    def __init__(self, screen_resolution: np.array, position: np.array = np.array([0.0, 0.0]),
+    def __init__(self, position: np.array = np.array([0.0, 0.0]),
                  velocity: np.array = np.array([0.0, 0.0])):
-        super().__init__(1e-16, position, radius=2.0, velocity=velocity)
+        super().__init__(1e-16, position, radius=3.0, velocity=velocity)
 
         self.mouse_position = np.zeros(2)
         self.mouse_attraction = 0.0

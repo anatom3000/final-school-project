@@ -6,7 +6,7 @@ import pygame
 
 from utils import Stringable
 
-RADIUS_FACTOR = np.pi
+RADIUS_FACTOR = 10.0
 MAX_MASS = 20.0
 
 
@@ -37,9 +37,6 @@ class Particle(Stringable):
     def display(self, surface: pygame.Surface, camera):
         pygame.draw.circle(surface, self.color, camera.convert_position(self.position),
                            camera.convert_radius(self.radius))
-
-    def get_rect(self):
-        return pygame.Rect(center=self.position, width=self.radius, height=self.radius)
 
     def merge(self, other):
         new_mass = self.mass + other.mass

@@ -51,9 +51,9 @@ class Camera(Stringable):
         # function made in Desmos
         # https://www.desmos.com/calculator/w9ns72ijq1
         x = np.linalg.norm(velocity)
-        m = 0.16
-        a = 0.1
-        b = 0.47
+        m = 0.5
+        a = 8.6
+        b = 0.2
         c = 0
         # return 5.0
         return 1 / (m * tanh(x / a + b)) + c

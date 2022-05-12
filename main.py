@@ -17,13 +17,13 @@ PROPULSION_INIT = 2e2
 PROPULSION_STEP = 2e2
 PROPULSION_MAX = 5e4
 BASE_MASS = 1
-G = 1e6
+G = 3e6
 
 DEBUGGING = False
 
 pygame.init()
 
-player = Player(RESOLUTION, velocity=np.array((100.0, 0.0)))
+player = Player(velocity=np.array((100.0, 0.0)))
 
 BOUND = 100.0
 
