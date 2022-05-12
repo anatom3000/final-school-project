@@ -7,7 +7,7 @@ NB_REFRESH_FRAME = 10
 POLICE = pygame.font.Font("assets/Computerfont.ttf", 72)
 
 
-class Compteur():
+class Compteur:
     def __init__(self, pol=POLICE, pos=(10, 10), dim=(200, 50), label=""):
         self.position = pos
         self.dimension = np.array(dim)

@@ -4,7 +4,7 @@ import numpy as np
 
 from particle import Particle
 from player import Player
-from utils import Stringable, unit, clamp
+from utils import Stringable, unit
 
 CHUNK_SIZE = 64
 COLISION_COOLDOWN = 3  # in frames
@@ -13,7 +13,7 @@ BOUNCYNESS = 2
 MOVEMENT_COOLDOWN = 2.0
 LOCAL_SIMULATION_DISTANCE = 64
 RENDER_DISTANCE = 400  # valeur a ajuster car 100% random
-MAX_SPEED = 50
+MAX_ACCELERATION = 50
 
 
 class World(Stringable):
@@ -35,9 +35,9 @@ class World(Stringable):
             ))
         return cls(player, np.array(particles), constant)
 
-    def tick(self, dtime: float):
+    def tick(self, dtime: float, tick_player: bool = True):
         self.particles = np.array(sorted(self.particles, key=lambda particule: particule.position[0]))
-        all_particles = np.append(self.particles, [self.player])
+        all_particles = np.append(self.particles, [self.player]) if tick_player else self.particles
         for index_1, particle in enumerate(all_particles):
             particle.acceleration = np.zeros(2)
             for other_particle in self.particles[self.particles != particle]:
@@ -48,14 +48,17 @@ class World(Stringable):
                     partial_acceleration *= unit(particle_to_other_particle)
                     particle.acceleration += partial_acceleration
 
+            particle.acceleration = np.clip(particle.acceleration, -MAX_ACCELERATION * np.ones(2), MAX_ACCELERATION * np.ones(2))
+            particle.acceleration *= self.constant
+
             if particle.is_player:
                 distance = particle.mouse_position - particle.position
                 if np.linalg.norm(distance) > (particle.radius + 0.5) and particle.movement_cooldown == 0:
                     particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance) ** 0.5 * unit(
                         distance)
 
-            particle.acceleration *= self.constant
-            particle.velocity = np.clip(particle.acceleration * dtime, -MAX_SPEED*np.ones(2), MAX_SPEED*np.ones(2))
+            particle.velocity = particle.acceleration * dtime
+
             if not (particle.merged or particle.is_player):
                 for index_2, other_particle in enumerate(
                         self.particles[self.particles != particle][index_1 - 2: index_1 + 2]):

@@ -3,11 +3,19 @@ import pygame
 
 from particle import Particle
 
-TRAIL_COLOR = (0, 255, 0)
-TRAIL_SIZE = 1.0
+TRAIL_COLOR = 0.5
+TRAIL_LENGHT = 8
 USE_TRAIL = False
+TRAIL_FREQUENCY = 0.08
 
 MOUSE_COLOR = (0, 0, 255)
+
+
+def draw_circle_alpha(surface, color, center, radius):
+    target_rect = pygame.Rect(center, (0, 0)).inflate((radius * 2, radius * 2))
+    shape_surf = pygame.Surface(target_rect.size, pygame.SRCALPHA)
+    pygame.draw.circle(shape_surf, color, (radius, radius), radius)
+    surface.blit(shape_surf, target_rect)
 
 
 class Player(Particle):
@@ -16,15 +24,19 @@ class Player(Particle):
     def __init__(self, screen_resolution: np.array, position: np.array = np.array([0.0, 0.0]),
                  velocity: np.array = np.array([0.0, 0.0])):
         super().__init__(1e-16, position, radius=2.0, velocity=velocity)
+
         self.mouse_position = np.zeros(2)
         self.mouse_attraction = 0.0
         self.movement_cooldown = 0.0
+
         self._colors = {
-            "idle": (255, 0, 0),
-            "disoriented": (255, 0, 64)
+            "idle": np.array([255, 0, 0]),
+            "disoriented": np.array([255, 0, 64])
         }
 
-        self.transparent_surface = pygame.Surface(screen_resolution, pygame.SRCALPHA)
+        self.last_positions = []
+
+        self.last_trail_update = 0
 
     @property
     def color(self):
@@ -37,25 +49,20 @@ class Player(Particle):
     def color(self, value):
         pass
 
-    def display(self, surface: pygame.Surface, camera, background_color: tuple = (255, 255, 255)):
-        self.transparent_surface.fill((255, 255, 255, 244), special_flags=pygame.BLEND_RGBA_MULT)
+    def display(self, surface: pygame.Surface, camera, dt: float = 0.0):
+        self.last_trail_update += dt
+        for i, position in enumerate(self.last_positions):
+            draw_circle_alpha(surface, np.append(TRAIL_COLOR * self.color, (255 * (i + 1) / TRAIL_LENGHT)),
+                              camera.convert_position(position), camera.convert_radius(self.radius))
 
-        on_screen_radius = camera.convert_radius(self.radius)
-        particle_surface = pygame.Surface((on_screen_radius * 2, on_screen_radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(particle_surface, self.color, (on_screen_radius, on_screen_radius), on_screen_radius)
+        pygame.draw.circle(surface, self.color, camera.convert_position(self.position),
+                           camera.convert_radius(self.radius))
 
-        if USE_TRAIL:
-            trail_radius = on_screen_radius * TRAIL_SIZE
-            trail_surface = pygame.Surface((2 * trail_radius, 2 * trail_radius), pygame.SRCALPHA)
-            pygame.draw.circle(trail_surface, TRAIL_COLOR, (trail_radius, trail_radius), on_screen_radius * TRAIL_SIZE)
-            self.transparent_surface.blit(trail_surface,
-                                          trail_surface.get_rect(center=camera.convert_position(self.position)))
-
-        self.transparent_surface.blit(particle_surface,
-                                      particle_surface.get_rect(center=camera.convert_position(self.position)))
-
-        surface.blit(self.transparent_surface, (0, 0))
+        if self.last_trail_update > TRAIL_FREQUENCY:
+            self.last_trail_update = 0.0  # we could just put a modulo but this can prevent potentail overflow errors if the game is running for too long
+            self.last_positions.append(np.copy(self.position))
+            self.last_positions = self.last_positions[-TRAIL_LENGHT:]
 
     def display_mouse(self, surface: pygame.Surface, camera):
         pygame.draw.circle(surface, MOUSE_COLOR, camera.convert_position(self.mouse_position),
-                           self.mouse_attraction * 5000, width=int(self.mouse_attraction * 200 + 1))
+                           self.mouse_attraction / 100, width=1)

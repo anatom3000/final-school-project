@@ -13,9 +13,9 @@ from utils import clamp
 BLACK = (0, 0, 0)
 LIGHT_BLUE = (0, 0, 16)
 RESOLUTION = np.array([960, 720])
-PROPULSION_INIT = 0.0002
-PROPULSION_STEP = 0.0002
-PROPULSION_MAX = 0.05
+PROPULSION_INIT = 2e2
+PROPULSION_STEP = 2e2
+PROPULSION_MAX = 5e4
 BASE_MASS = 1
 G = 1e6
 
@@ -33,21 +33,21 @@ world = World.random(player, particle_number=100, constant=G, min_position=np.ar
 camera = Camera(RESOLUTION)
 
 screen = pygame.display.set_mode(RESOLUTION)
-pygame.mouse.set_visible(False)
+
 clock = pygame.time.Clock()
+pygame.mouse.set_visible(False)
 
 compteur_vitesse = Compteur(label="Speed : ")
 
 camera.follow(player, smoothing=False)
 player.mouse_attraction = PROPULSION_INIT
-player.movement_cooldown = 5.0
 
 tick_physics = True
 show_ui = True
 running = True
 speed = 1
+tick_player = False
 
-f = 0
 
 while running:
     for ev in pygame.event.get():
@@ -61,6 +61,8 @@ while running:
                 show_ui = not show_ui
 
         if ev.type == MOUSEBUTTONDOWN:
+            if ev.button == 1:
+                tick_player = True
             # 1 = left click; 2 = middle click; 3 = right click; 4 = scroll up; 5 = scroll down
             if ev.button == 4:
                 player.mouse_attraction = clamp(0, player.mouse_attraction + PROPULSION_STEP, PROPULSION_MAX)
@@ -68,21 +70,20 @@ while running:
                 player.mouse_attraction = clamp(0, player.mouse_attraction - PROPULSION_STEP, PROPULSION_MAX)
 
     dt = clock.tick() / 1000
-    f += 1
 
     player.mouse_position = camera.real_position_from_screen(pygame.mouse.get_pos())
 
     if tick_physics:
         screen.fill(LIGHT_BLUE)
 
-        world.tick(dt / speed)
+        world.tick(dt / speed, tick_player)
 
         camera.follow(player)
         camera.tick(dt / speed)
     else:
         screen.fill(LIGHT_BLUE)
 
-    player.display(screen, camera)
+    player.display(screen, camera, dt)
     for particle in world:
         particle.display(screen, camera)
     player.display_mouse(screen, camera)
@@ -99,8 +100,5 @@ while running:
         pygame.draw.circle(screen, (255, 255, 0), RESOLUTION / 2, 1)
 
     pygame.display.set_caption(f"FPS: {round(clock.get_fps(), 1)} - Speed: {speed}")
-
-    if f % 120 == 0:
-        print(player.velocity)
 
     pygame.display.flip()
