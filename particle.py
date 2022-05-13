@@ -26,6 +26,7 @@ class Particle(Stringable):
         self.acceleration = acceleration
         self.forces = np.array([])
         self.to_delete = False
+        self.noclip = False
 
         self.color = (randint(0, 255), randint(0, 255), randint(0, 255)) if color is None else color
 

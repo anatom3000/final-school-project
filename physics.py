@@ -1,9 +1,10 @@
 # coding: utf-8
-from random import uniform
+from random import uniform, randint, random
 
 import numpy as np
 
-from constants import LOCAL_SIMULATION_DISTANCE, MAX_ACCELERATION, DESPAWNING_DISTANCE, BOUNCYNESS, MOVEMENT_COOLDOWN
+from constants import LOCAL_SIMULATION_DISTANCE, MAX_ACCELERATION, SPAWNING_DISTANCE, DESPAWNING_DISTANCE, \
+    MOVEMENT_COOLDOWN, PARTICLE_CAP, SPAWNING_DENSITY
 from particle import Particle
 from player import Player
 from utils import Stringable, unit
@@ -49,6 +50,15 @@ class World(Stringable):
             ))
         return cls(player, np.array(particles), constant)
 
+    def spawn_particles(self, dt, min_mass=0.2, max_mass=1.0):
+        if SPAWNING_DENSITY >= random():
+            x = uniform(-SPAWNING_DISTANCE, SPAWNING_DISTANCE)
+            y = np.sqrt(SPAWNING_DISTANCE ** 2 - x ** 2) * [-1, 1][randint(0, 1)]
+            pos = np.array([x, y]) + self.player.position + np.array([randint(0, 25), randint(0, 25)])
+            particle = Particle(mass=uniform(min_mass, max_mass), position=pos)
+
+            self.particles = np.append(self.particles, particle)
+
     def tick(self, dtime: float, tick_player: bool = True):
         """
         Méthode calculant les déplacement de toutes particules.
@@ -57,21 +67,22 @@ class World(Stringable):
         """
         self.particles = np.array(sorted(self.particles, key=lambda particule: particule.position[0]))
         # on inclut le joueur dans les calculs si tick_player
-        all_particles = np.append(self.particles, [self.player]) if tick_player else self.particles
+        all_particles = np.append(self.particles, [self.player]) if tick_player or self.player.movement_cooldown else self.particles
         for index_1, particle in enumerate(all_particles):
             particle.acceleration = np.zeros(2)
             # ∑Fg = -G * ∑ M*m / d² * u_A→B
-            for other_particle in self.particles[self.particles != particle]:
-                particle_to_other_particle = other_particle.position - particle.position
-                distance = np.linalg.norm(particle_to_other_particle)
-                # optimisation: si 2 particules sont trop éloignées, on néglige leur force d'attraction
-                if particle.radius < distance < LOCAL_SIMULATION_DISTANCE:
-                    # equivalent à F = Mm/d² * u_A→B
-                    # on ne prends pas en compte la masse de la particule affectée car ne change pas l'acceleration (F = ma)
-                    # on calcule alors directement l'accélération
-                    partial_acceleration = other_particle.mass / (distance ** 2)
-                    partial_acceleration *= unit(particle_to_other_particle)
-                    particle.acceleration += partial_acceleration
+            if not particle.noclip:
+                for other_particle in self.particles[self.particles != particle]:
+                    particle_to_other_particle = other_particle.position - particle.position
+                    distance = np.linalg.norm(particle_to_other_particle)
+                    # optimisation: si 2 particules sont trop éloignées, on néglige leur force d'attraction
+                    if particle.radius < distance < LOCAL_SIMULATION_DISTANCE:
+                        # equivalent à F = Mm/d² * u_A→B
+                        # on ne prends pas en compte la masse de la particule affectée car ne change pas l'acceleration (F = ma)
+                        # on calcule alors directement l'accélération
+                        partial_acceleration = other_particle.mass / (distance ** 2)
+                        partial_acceleration *= unit(particle_to_other_particle)
+                        particle.acceleration += partial_acceleration
 
             # on limite l'accélération pour éviter que la simulation ne s'effondre
             # (particules envoyées très loins car bug dans les lois de Newton pour d petit
@@ -86,10 +97,12 @@ class World(Stringable):
             if isinstance(particle, Player):
                 distance = particle.mouse_position - particle.position
                 if np.linalg.norm(distance) > (particle.radius + 0.5) and particle.movement_cooldown <= 0:
-                    particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance) ** 0.5 * unit(distance)
+                    particle.acceleration += particle.mouse_attraction * np.linalg.norm(distance) ** 0.5 * unit(
+                        distance)
 
             # v = ∫a dt
             particle.velocity = particle.acceleration * dtime
+
 
             if not (particle.to_delete or isinstance(particle, Player)):
                 for index_2, other_particle in enumerate(
@@ -105,14 +118,15 @@ class World(Stringable):
                     distance = other_particle.position - particle.position
                     if np.linalg.norm(distance) >= DESPAWNING_DISTANCE:
                         other_particle.to_delete = True
-                    elif np.linalg.norm(distance) <= particle.radius + other_particle.radius:
+                    elif np.linalg.norm(distance) <= particle.radius + other_particle.radius and not particle.noclip:
                         particle.acceleration = np.array([0, 0])
-                        particle.velocity = particle.velocity * -BOUNCYNESS
                         particle.movement_cooldown = MOVEMENT_COOLDOWN
                         other_particle.to_delete = True
 
             particle.position += particle.velocity * dtime
 
+        if np.size(self.particles) < PARTICLE_CAP:
+            self.spawn_particles(dtime)
         self.particles = self.particles[[(not p.to_delete) for p in self.particles]]
 
     def __iter__(self):

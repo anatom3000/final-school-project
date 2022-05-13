@@ -21,6 +21,7 @@ class Camera(Stringable):
     Ressources:
         - https://fr.wikipedia.org/wiki/Interpolation_lin%C3%A9aire
     """
+
     def __init__(self, resolution: np.array, zoom: float = 2.0, position: np.array = None):
         self._position = np.array([0.0, 0.0]) if position is None else position
         self._zoom = zoom
@@ -89,16 +90,19 @@ class Camera(Stringable):
         # return 5.0
         return 1 / (m * tanh(x / a + b)) + c
 
-    def follow(self, particle: Particle, smoothing: bool = True):
+    def follow(self, particle: Particle, position_smoothing: bool = True, zoom_smoothing: bool = True):
         """
         Méthode permettant de bouger la caméra vers la position d'une particule.
         Utilisée pour le joueur
         """
-        if smoothing:
-            self.position = self.zoom * particle.position
-            self.zoom = Camera._convert_velocity_to_zoom(particle.velocity)
+        if position_smoothing:
+            self.position = particle.position * self.zoom
         else:
             self._position = self.zoom * particle.position
+
+        if zoom_smoothing:
+            self.zoom = Camera._convert_velocity_to_zoom(particle.velocity)
+        else:
             self._zoom = Camera._convert_velocity_to_zoom(particle.velocity)
 
     def convert_position(self, position: np.array):
@@ -124,4 +128,6 @@ class Camera(Stringable):
         dt est le temps en secondes depuis la dernière frame
         """
         self._position = lerp(self._position, self._target_position, dt * CAMERA_POSITION_SMOOTHING_SPEED)
-        self._zoom = lerp(self._zoom, self._target_zoom, dt * CAMERA_ZOOM_SMOOTHING_SPEED)
+        delta_zoom = lerp(self._zoom, self._target_zoom, dt * CAMERA_ZOOM_SMOOTHING_SPEED) / self._zoom
+        self._position *= delta_zoom
+        self._zoom *= delta_zoom

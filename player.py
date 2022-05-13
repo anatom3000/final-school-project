@@ -14,6 +14,8 @@ class Player(Particle):
         self.mouse_position = np.zeros(2)
         self.mouse_attraction = 0.0
         self.movement_cooldown = 0.0
+        
+        self.noclip = False
 
         self._colors = {
             "idle": np.array([255, 0, 0]),
@@ -38,7 +40,8 @@ class Player(Particle):
     def display(self, surface: pygame.Surface, camera, dt: float = 0.0):
         self.last_trail_update += dt
         for i, position in enumerate(self.last_positions):
-            draw_circle_alpha(surface, np.append(PLAYER_TRAIL_COLOR * self.color, (255 * (i + 1) / PLAYER_TRAIL_LENGHT)),
+            draw_circle_alpha(surface,
+                              np.append(PLAYER_TRAIL_COLOR * self.color, (255 * (i + 1) / PLAYER_TRAIL_LENGHT)),
                               camera.convert_position(position), camera.convert_radius(self.radius))
 
         pygame.draw.circle(surface, self.color, camera.convert_position(self.position),
